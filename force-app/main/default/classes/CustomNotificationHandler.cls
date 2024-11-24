@@ -1,10 +1,13 @@
 public without sharing virtual class CustomNotificationHandler implements ICustomNotification {
-	private String title;
-	private String body;
+	private static final Integer TITLE_UPPER_BOUND = 250;
+	private static final Integer BODY_UPPER_BOUND = 750;
+
+	protected String title;
+	protected String body;
+	protected String developerName;
 	private Id targetId;
 	private Set<String> userIds;
 	private Id senderId;
-	private String developerName;
 	private String pageReferenceDevName;
 
 	/**
@@ -14,27 +17,21 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 	private Map<String, CustomNotificationType> developerNameToCustomNotification {
 		get {
 			if(this.developerNameToCustomNotification == null) {
-				return [SELECT Id, DeveloperName, Language, MasterLabel, NamespacePrefix, CreatedDate, CreatedById, LastModifiedDate, LastModifiedById, SystemModStamp, Description, Desktop, Mobile FROM CustomNotificationType WHERE IsDeleted = false];
+				this.developerNameToCustomNotification = new Map<String, CustomNotificationType>();
+				for (CustomNotificationType customNoty : [SELECT Id, DeveloperName, Language, MasterLabel, NamespacePrefix, CreatedDate, CreatedById, LastModifiedDate, LastModifiedById, SystemModStamp, Description, Desktop, Mobile FROM CustomNotificationType WHERE IsDeleted = false]) {
+					this.developerNameToCustomNotification.put(
+						customNoty.DeveloperName, customNoty
+					);
+				}
 			}
 			return this.developerNameToCustomNotification;
 		}
 		set;
 	}
 
-	public CustomNotificationHandler() {
-		this.setDevNameToCustomNotificationMap();
-	}
-
-	public virtual ICustomNotification setTitle(String title) {
-		this.title = title;
-		return this;
-	}
-
-	public virtual ICustomNotification setBody(String body) {
-		this.body = body;
-		return this;
-	}
-
+	/**
+	 * @description Specify a target record to display when 
+	 */
 	public virtual ICustomNotification setTargetId(Id targetId) {
 		this.targetId = targetId;
 		return this;
@@ -47,15 +44,23 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 		return this;
 	}
 
-	public virtual ICustomNotification setSenderId(Id senderId) {
-		this.senderId = senderId;
+	public virtual ICustomNotification setTitle(String title) {
+		this.title = title;
 		return this;
 	}
 
-	public virtual ICustomNotification setDeveloperName(
-		String developerName
-	) {
+	public virtual ICustomNotification setBody(String body) {
+		this.body = body;
+		return this;
+	}
+
+	public virtual ICustomNotification setDeveloperName(String developerName) {
 		this.developerName = developerName;
+		return this;
+	}
+
+	public virtual ICustomNotification setSenderId(Id senderId) {
+		this.senderId = senderId;
 		return this;
 	}
 
@@ -69,23 +74,19 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 		return this;
 	}
 
-	private void setDevNameToCustomNotificationMap() {
-		for (CustomNotificationType customNoty : this.developerNameToCustomNotification.values()) {
-			this.developerNameToCustomNotification.put(
-				customNoty.DeveloperName, customNoty
-			);
-		}
-	}
-
 	public void send() {
 		if (
-			this.title == null ||
-			this.body == null ||
-			this.developerName == null ||
-			this.userIds == null ||
-			(this.targetId == null && this.pageReferenceDevName == null)
+			(
+				String.isBlank(this.title) || 
+				String.isBlank(this.body) || 
+				this.developerName == null ||
+				this.userIds.isEmpty() ||
+				(this.targetId == null || this.pageReferenceDevName == null)
+			)
 		) {
 			throw new IncompleteNotificationException();
+		} else if(this.title.length() > TITLE_UPPER_BOUND || this.body.length() > BODY_UPPER_BOUND) {
+			throw new InvalidMessageContentsException();
 		} else {
 			Messaging.CustomNotification notification = makeCustomNotification();
 			notification.send(this.userIds);
@@ -94,20 +95,16 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 
 	private Messaging.CustomNotification makeCustomNotification() {
 		return new Messaging.CustomNotification(
-			// typeId
 			this.developerNameToCustomNotification.get(this.developerName).Id,
-			// sender
 			this.senderId,
-			// title
 			this.title,
-			// body
 			this.body,
-			// targetId
 			this.targetId,
-			// targetPageRef
 			this.pageReferenceDevName
 		);
 	}
 
 	public class IncompleteNotificationException extends Exception {}
+
+	public class InvalidMessageContentsException extends Exception {}
 }
