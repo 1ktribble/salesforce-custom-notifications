@@ -81,10 +81,22 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 				String.isBlank(this.body) || 
 				this.developerName == null ||
 				this.userIds.isEmpty() ||
-				(this.targetId == null || this.pageReferenceDevName == null)
+				(this.targetId == null && this.pageReferenceDevName == null)
 			)
 		) {
-			throw new IncompleteNotificationException();
+			throw new IncompleteNotificationException(
+				String.format(
+					'Please provide the following required fields: Title: {0}. Body: {1}. Developer Name: {2}. User Ids: {3}. And one of either Target Id: {4} or Page Reference Developer Name: {5}', 
+					new List<Object>{
+						this.title,
+						this.body,
+						this.developerName,
+						this.userIds,
+						this.targetId,
+						this.pageReferenceDevName 
+					}
+				)
+			);
 		} else if(this.title.length() > TITLE_UPPER_BOUND || this.body.length() > BODY_UPPER_BOUND) {
 			throw new InvalidMessageContentsException();
 		} else {
