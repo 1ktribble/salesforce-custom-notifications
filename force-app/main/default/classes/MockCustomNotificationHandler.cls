@@ -1,5 +1,5 @@
 @isTest
-public class MockCustomNotificationHandler implements ICustomNotification {
+public class MockCustomNotificationHandler extends CustomNotificationHandler {
 	public static List<Messaging.CustomNotification> notificationsSent = 
 		new List<Messaging.CustomNotification>();
 	public static Set<String> usersSent;
@@ -11,38 +11,38 @@ public class MockCustomNotificationHandler implements ICustomNotification {
 	private Id senderId;
 	private String pageReferenceDevName;
 
-	public ICustomNotification setTitle(String title) {
+	public override ICustomNotification setTitle(String title) {
 		this.title = title;
 		return this;
 	}
 
-	public ICustomNotification setBody(String body) {
+	public override ICustomNotification setBody(String body) {
 		this.body = body;
 		return this;
 	}
 
-	public ICustomNotification setTargetId(Id targetId) {
+	public override ICustomNotification setTargetId(Id targetId) {
 		return this;
 	}
 
-	public ICustomNotification setUsers(Set<String> userIds) {
+	public override ICustomNotification setUsers(Set<String> userIds) {
 		usersSent = userIds;
 		return this;
 	}
 
-	public ICustomNotification setSenderId(Id senderId) {
+	public override ICustomNotification setSenderId(Id senderId) {
 		return this;
 	}
 
-	public ICustomNotification setDeveloperName(String developerName) {
+	public override ICustomNotification setDeveloperName(String developerName) {
 		return this;
 	}
 
-	public ICustomNotification setPageReferenceDevName(String pageReferenceDevName) {
+	public override ICustomNotification setPageReferenceDevName(String pageReferenceDevName) {
 		return this;
 	}
 
-	public void send() {
+	public override void send() {
 		Messaging.CustomNotification mockedNoty = 
 			new Messaging.CustomNotification();
 

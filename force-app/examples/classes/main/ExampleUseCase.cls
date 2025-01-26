@@ -1,6 +1,9 @@
 public with sharing class ExampleUseCase {
     private static final Id SELF = UserInfo.getUserId();
 
+    @TestVisible
+    ICustomNotification customNotification;
+
     public void sendBasicNotification() {
         ICustomNotification basicNoty = new ExampleNotification().setTargetId(SELF).setSenderId(SELF).setUsers(new Set<String>{ String.valueOf(SELF) });
         basicNoty.send();

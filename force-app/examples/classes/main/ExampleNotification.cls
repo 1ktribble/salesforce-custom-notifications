@@ -1,5 +1,8 @@
 public class ExampleNotification extends CustomNotificationHandler {
+    @TestVisible
     private static final String TITLE = 'Example Notification';
+
+    @TestVisible
     private static final String BODY = 'Standard Body';
 
     private static final String FORMATTED_TITLE = 'Formatted {0} Title';

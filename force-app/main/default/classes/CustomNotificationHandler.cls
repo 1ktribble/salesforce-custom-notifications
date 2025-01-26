@@ -74,7 +74,7 @@ public without sharing virtual class CustomNotificationHandler implements ICusto
 		return this;
 	}
 
-	public void send() {
+	public virtual void send() {
 		if (
 			(
 				String.isBlank(this.title) || 
