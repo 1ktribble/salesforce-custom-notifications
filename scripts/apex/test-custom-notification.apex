@@ -1,7 +1,11 @@
-// Use .apex files to store anonymous Apex.
-// You can execute anonymous Apex in VS Code by selecting the
-//     apex text and running the command:
-//     SFDX: Execute Anonymous Apex with Currently Selected Text
-// You can also execute the entire file by running the command:
-//     SFDX: Execute Anonymous Apex with Editor Contents
+static final Id SELF = UserInfo.getUserId();
 
+// Send a basic notification
+ICustomNotification basicNoty = new ExampleNotification().setTargetId(SELF).setSenderId(SELF).setUsers(new Set<String>{ String.valueOf(SELF) });
+basicNoty.send();
+
+// Send a formatted notification
+List<String> formattedTitle = new List<String>{ 'Title' };
+List<String> formattedBody = new List<String>{ 'Body' };
+ICustomNotification formattedNoty = new ExampleNotification(formattedTitle, formattedBody).setTargetId(SELF).setSenderId(SELF).setUsers(new Set<String>{ String.valueOf(SELF) });
+formattedNoty.send();
